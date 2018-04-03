@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="main.css" />
+		<style>
+			.header{
+				height: 40px;
+				width: 900px;
+				margin: 0 auto 50px;
+			}
+			#box{
+				width: 300px;
+				height: 30px;
+				border: 1px solid black;
+				float: left;
+				margin-left:500px;
+			}
+			#box li{
+				float: left;
+				list-style: none;
+				display: inline-block;
+				padding: 0 5px;
+			}
+			#box li.active{
+				color: pink;
+				background: blue;
+			}
+			#box ul{
+				/*float: left;*/
+				display: inline-block;
+			}
+		</style>
+	</head>
+	<body>		 		 
+		<ul class="shoplist clearfix" id="main">
+			<!--<li>
+				<img src="img/1.jpg" alt="" />
+				<p>小米1</p>
+				<p>999</p>
+				<button>购买</button>
+			</li>-->
+		</ul>	
+		<div id="box">
+			<span id="left">上一页</span>
+			<ul id="u">
+				<li>1</li>
+				<li>2</li>
+				<li>3</li>
+			</ul>
+			<span id="right">下一页</span>
+		</div>
+	</body>
+</html>
+<script src="ajax.js"></script>
+<script type="text/javascript">
+	var main = document.getElementById("main");
+	var pageUl = document.getElementById("u");
+	var oPrev = document.getElementById("left");
+	var oNext = document.getElementById("right");
+	var index = 1;//初始页码
+	var pageNum = 4;//每页显示商品数据量
+	//ajax操作显示商品列表
+	showData();
+	function showData(){
+		var url = "data.json";
+		ajaxGet(url,function(res){
+			var arr = JSON.parse(res);
+			var str = "";
+			for( var i = (index-1)*pageNum ; i < index*pageNum ; i++ ){
+				//i 0--16  解决最后一页下标越界
+				if( i < arr.length ){
+					str += `<li>
+								<img src="img/${arr[i].src}" alt="" />
+								<p>${arr[i].name}</p>
+								<p>${arr[i].price}</p>
+								<button>购买</button>
+							</li>`;
+				}
+			}
+			main.innerHTML = str;
+			
+			//确定页数  
+			total = Math.ceil(arr.length / pageNum);
+			var page = "";
+			//动态创建页面
+			for( var i = 1 ; i <= total ; i++ ){
+				page += `<li>${i}</li>`;
+			}
+			pageUl.innerHTML = page;
+			
+			//对应的页码高亮显示 
+			pageUl.children[index-1].className = "active";
+		})
+	}
+	
+	//委托   点击页码显示对应的数据
+	pageUl.onclick = function(e){
+		var e = e || event;
+		var target = e.target || e.srcElement;
+		if( target.nodeName == "LI" ){
+			index = target.innerHTML;//获取当前页码
+			showData();
+		}
+	}
+	//上一页和下一页
+	oPrev.onclick = function(){
+		if( index < 0 ){
+			index = 0;
+		}else{
+			index--;
+		}
+		showData();
+	}
+	
+	oNext.onclick = function(){
+		if( index >= 5 ){
+			index = 5;
+		}else{
+			index++;
+		}
+		showData();
+	}
+	/*
+   index 	start  		end  <
+	 1  	0    		4
+	 2   	4    		8
+	 3   	8    		12
+	 4   	12   		16
+	 5   	16   		20
+		(index-1)*4    index*4
+	bug : 最后一页下标越界  
+	 */
+</script>
